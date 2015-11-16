@@ -3,8 +3,8 @@
     android:layout_height="match_parent"
     android:orientation="vertical" >
 
-    <android.opengl.GLSurfaceView
-        android:id="@+id/surfaceView"
+    <jp.co.cyberagent.android.gpuimage.GLTextureView
+        android:id="@+id/textureView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_above="@+id/bar" />

@@ -20,10 +20,8 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.media.MediaScannerConnection;
-import android.graphics.PixelFormat;
 import android.net.Uri;
 import android.opengl.GLES20;
-import android.opengl.GLSurfaceView;
 import android.os.*;
 import android.util.AttributeSet;
 import android.view.Gravity;
@@ -39,7 +37,7 @@ import java.util.concurrent.Semaphore;
 
 public class GPUImageView extends FrameLayout {
 
-    private GLSurfaceView mGLSurfaceView;
+    private GLTextureView mGLTextureView;
     private GPUImage mGPUImage;
     private GPUImageFilter mFilter;
     public Size mForceSize = null;
@@ -56,13 +54,12 @@ public class GPUImageView extends FrameLayout {
     }
 
     private void init(Context context, AttributeSet attrs) {
-        mGLSurfaceView = new GPUImageGLSurfaceView(context, attrs);
-        mGLSurfaceView.setZOrderOnTop(true);
-        mGLSurfaceView.setEGLConfigChooser(8, 8, 8, 8, 16, 0);
-        mGLSurfaceView.getHolder().setFormat(PixelFormat.TRANSPARENT);
-        addView(mGLSurfaceView);
+        mGLTextureView = new GPUImageTextureView(context, attrs);
+        mGLTextureView.setEGLConfigChooser(8, 8, 8, 8, 16, 0);
+//        mGLTextureView.getHolder().setFormat(PixelFormat.TRANSPARENT);
+        addView(mGLTextureView);
         mGPUImage = new GPUImage(getContext());
-        mGPUImage.setGLSurfaceView(mGLSurfaceView);
+        mGPUImage.setGLTextureView(mGLTextureView);
     }
 
     @Override
@@ -101,7 +98,7 @@ public class GPUImageView extends FrameLayout {
     // TODO Should be an xml attribute. But then GPUImage can not be distributed as .jar anymore.
     public void setRatio(float ratio) {
         mRatio = ratio;
-        mGLSurfaceView.requestLayout();
+        mGLTextureView.requestLayout();
         mGPUImage.deleteImage();
     }
 
@@ -172,7 +169,7 @@ public class GPUImageView extends FrameLayout {
     }
 
     public void requestRender() {
-        mGLSurfaceView.requestRender();
+        mGLTextureView.requestRender();
     }
 
     /**
@@ -246,7 +243,7 @@ public class GPUImageView extends FrameLayout {
                 // Show loading
                 addView(new LoadingView(getContext()));
 
-                mGLSurfaceView.requestLayout();
+                mGLTextureView.requestLayout();
             }
         });
         waiter.acquire();
@@ -267,7 +264,7 @@ public class GPUImageView extends FrameLayout {
         post(new Runnable() {
             @Override
             public void run() {
-                mGLSurfaceView.requestLayout();
+                mGLTextureView.requestLayout();
             }
         });
         requestRender();
@@ -291,8 +288,8 @@ public class GPUImageView extends FrameLayout {
     public Bitmap capture() throws InterruptedException {
         final Semaphore waiter = new Semaphore(0);
 
-        final int width = mGLSurfaceView.getMeasuredWidth();
-        final int height = mGLSurfaceView.getMeasuredHeight();
+        final int width = mGLTextureView.getMeasuredWidth();
+        final int height = mGLTextureView.getMeasuredHeight();
 
         // Take picture on OpenGL thread
         final int[] pixelMirroredArray = new int[width * height];
@@ -320,20 +317,6 @@ public class GPUImageView extends FrameLayout {
         return bitmap;
     }
 
-    /**
-     * Pauses the GLSurfaceView.
-     */
-    public void onPause() {
-        mGLSurfaceView.onPause();
-    }
-
-    /**
-     * Resumes the GLSurfaceView.
-     */
-    public void onResume() {
-        mGLSurfaceView.onResume();
-    }
-
     public static class Size {
         int width;
         int height;
@@ -344,12 +327,12 @@ public class GPUImageView extends FrameLayout {
         }
     }
 
-    private class GPUImageGLSurfaceView extends GLSurfaceView {
-        public GPUImageGLSurfaceView(Context context) {
+    private class GPUImageTextureView extends GLTextureView {
+        public GPUImageTextureView(Context context) {
             super(context);
         }
 
-        public GPUImageGLSurfaceView(Context context, AttributeSet attrs) {
+        public GPUImageTextureView(Context context, AttributeSet attrs) {
             super(context, attrs);
         }
 
