@@ -56,7 +56,7 @@ public class GPUImageView extends FrameLayout {
     private void init(Context context, AttributeSet attrs) {
         mGLTextureView = new GPUImageTextureView(context, attrs);
         mGLTextureView.setEGLConfigChooser(8, 8, 8, 8, 16, 0);
-//        mGLTextureView.getHolder().setFormat(PixelFormat.TRANSPARENT);
+        mGLTextureView.setOpaque(false);
         addView(mGLTextureView);
         mGPUImage = new GPUImage(getContext());
         mGPUImage.setGLTextureView(mGLTextureView);

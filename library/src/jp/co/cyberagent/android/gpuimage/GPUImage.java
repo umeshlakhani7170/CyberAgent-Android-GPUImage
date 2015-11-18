@@ -91,7 +91,7 @@ public class GPUImage {
         mGLTextureView = view;
         mGLTextureView.setEGLContextClientVersion(2);
         mGLTextureView.setEGLConfigChooser(8, 8, 8, 8, 16, 0);
-//        mGLTextureView.getHolder().setFormat(PixelFormat.RGBA_8888);
+        mGLTextureView.setOpaque(false);
         mGLTextureView.setRenderer(mRenderer);
         mGLTextureView.setRenderMode(GLTextureView.RENDERMODE_WHEN_DIRTY);
         mGLTextureView.requestRender();
