@@ -42,7 +42,6 @@ import android.view.WindowManager;
 import java.io.*;
 import java.net.URL;
 import java.util.List;
-import java.util.concurrent.Semaphore;
 
 /**
  * The main accessor for GPUImage functionality. This class helps to do common
@@ -52,6 +51,7 @@ public class GPUImage {
     private final Context mContext;
     private final GPUImageRenderer mRenderer;
     private GLSurfaceView mGlSurfaceView;
+    private GLTextureView mGLTextureView;
     private GPUImageFilter mFilter;
     private Bitmap mCurrentBitmap;
     private ScaleType mScaleType = ScaleType.CENTER_CROP;
@@ -101,6 +101,21 @@ public class GPUImage {
     }
 
     /**
+     * Sets the GLTextureView which will display the preview.
+     *
+     * @param view the GLTextureView
+     */
+    public void setGLTextureView(final GLTextureView view) {
+        mGLTextureView = view;
+        mGLTextureView.setEGLContextClientVersion(2);
+        mGLTextureView.setEGLConfigChooser(8, 8, 8, 8, 16, 0);
+        mGLTextureView.setOpaque(false);
+        mGLTextureView.setRenderer(mRenderer);
+        mGLTextureView.setRenderMode(GLTextureView.RENDERMODE_WHEN_DIRTY);
+        mGLTextureView.requestRender();
+    }
+
+    /**
      * Sets the background color
      *
      * @param red red color value
@@ -117,6 +132,9 @@ public class GPUImage {
     public void requestRender() {
         if (mGlSurfaceView != null) {
             mGlSurfaceView.requestRender();
+        }
+        if (mGLTextureView != null) {
+            mGLTextureView.requestRender();
         }
     }
 
@@ -139,7 +157,13 @@ public class GPUImage {
      */
     public void setUpCamera(final Camera camera, final int degrees, final boolean flipHorizontal,
             final boolean flipVertical) {
-        mGlSurfaceView.setRenderMode(GLSurfaceView.RENDERMODE_CONTINUOUSLY);
+        if (mGlSurfaceView!= null) {
+            mGlSurfaceView.setRenderMode(GLSurfaceView.RENDERMODE_CONTINUOUSLY);
+        }
+        if (mGLTextureView != null) {
+            mGLTextureView.setRenderMode(GLTextureView.RENDERMODE_CONTINUOUSLY);
+        }
+
         if (Build.VERSION.SDK_INT > Build.VERSION_CODES.GINGERBREAD_MR1) {
             setUpCameraGingerbread(camera);
         } else {
@@ -279,7 +303,7 @@ public class GPUImage {
      * @return the bitmap with filter applied
      */
     public Bitmap getBitmapWithFilterApplied(final Bitmap bitmap) {
-        if (mGlSurfaceView != null) {
+        if (mGlSurfaceView != null || mGLTextureView != null) {
             mRenderer.deleteImage();
             mRenderer.runOnDraw(new Runnable() {
 

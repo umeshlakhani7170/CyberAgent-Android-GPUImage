@@ -41,6 +41,7 @@ import java.util.concurrent.Semaphore;
 public class GPUImageView extends FrameLayout {
 
     private GLSurfaceView mGLSurfaceView;
+    private GLTextureView mGLTextureView;
     private GPUImage mGPUImage;
     private GPUImageFilter mFilter;
     public Size mForceSize = null;
@@ -57,10 +58,21 @@ public class GPUImageView extends FrameLayout {
     }
 
     private void init(Context context, AttributeSet attrs) {
-        mGLSurfaceView = new GPUImageGLSurfaceView(context, attrs);
-        addView(mGLSurfaceView);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N
+                || Build.VERSION.SDK_INT < Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
+            mGLSurfaceView = new GPUImageGLSurfaceView(context, attrs);
+            addView(mGLSurfaceView);
+        } else {
+            mGLTextureView = new GPUImageTextureView(context, attrs);
+            addView(mGLTextureView);
+        }
         mGPUImage = new GPUImage(getContext());
-        mGPUImage.setGLSurfaceView(mGLSurfaceView);
+        if (mGLSurfaceView != null) {
+            mGPUImage.setGLSurfaceView(mGLSurfaceView);
+        }
+        if (mGLTextureView != null) {
+            mGPUImage.setGLTextureView(mGLTextureView);
+        }
     }
 
     @Override
@@ -110,7 +122,7 @@ public class GPUImageView extends FrameLayout {
     // TODO Should be an xml attribute. But then GPUImage can not be distributed as .jar anymore.
     public void setRatio(float ratio) {
         mRatio = ratio;
-        mGLSurfaceView.requestLayout();
+        glViewRequestLayout();
         mGPUImage.deleteImage();
     }
 
@@ -181,7 +193,21 @@ public class GPUImageView extends FrameLayout {
     }
 
     public void requestRender() {
-        mGLSurfaceView.requestRender();
+        if (mGLSurfaceView != null) {
+            mGLSurfaceView.requestRender();
+        }
+        if (mGLTextureView != null) {
+            mGLTextureView.requestRender();
+        }
+    }
+
+    public void glViewRequestLayout() {
+        if (mGLSurfaceView != null) {
+            mGLSurfaceView.requestLayout();
+        }
+        if (mGLTextureView != null) {
+            mGLTextureView.requestLayout();
+        }
     }
 
     /**
@@ -255,7 +281,7 @@ public class GPUImageView extends FrameLayout {
                 // Show loading
                 addView(new LoadingView(getContext()));
 
-                mGLSurfaceView.requestLayout();
+                glViewRequestLayout();
             }
         });
         waiter.acquire();
@@ -276,7 +302,7 @@ public class GPUImageView extends FrameLayout {
         post(new Runnable() {
             @Override
             public void run() {
-                mGLSurfaceView.requestLayout();
+                glViewRequestLayout();
             }
         });
         requestRender();
@@ -292,6 +318,26 @@ public class GPUImageView extends FrameLayout {
         return bitmap;
     }
 
+    private int getGLViewMeasuredWidth() {
+        if (mGLSurfaceView != null) {
+            return mGLSurfaceView.getMeasuredWidth();
+        }
+        if (mGLTextureView != null) {
+            return mGLTextureView.getMeasuredWidth();
+        }
+        return 0;
+    }
+
+    private int getGLViewMeasuredHeight() {
+        if (mGLSurfaceView != null) {
+            return mGLSurfaceView.getMeasuredHeight();
+        }
+        if (mGLTextureView != null) {
+            return mGLTextureView.getMeasuredHeight();
+        }
+        return 0;
+    }
+
     /**
      * Capture the current image with the size as it is displayed and retrieve it as Bitmap.
      * @return current output as Bitmap
@@ -300,8 +346,8 @@ public class GPUImageView extends FrameLayout {
     public Bitmap capture() throws InterruptedException {
         final Semaphore waiter = new Semaphore(0);
 
-        final int width = mGLSurfaceView.getMeasuredWidth();
-        final int height = mGLSurfaceView.getMeasuredHeight();
+        final int width = getGLViewMeasuredWidth();
+        final int height = getGLViewMeasuredHeight();
 
         // Take picture on OpenGL thread
         final int[] pixelMirroredArray = new int[width * height];
@@ -330,17 +376,27 @@ public class GPUImageView extends FrameLayout {
     }
 
     /**
-     * Pauses the GLSurfaceView.
+     * Pauses the GLSurfaceView or GLTextureView.
      */
     public void onPause() {
-        mGLSurfaceView.onPause();
+        if (mGLSurfaceView != null) {
+            mGLSurfaceView.onPause();
+        }
+        if (mGLTextureView != null) {
+            mGLTextureView.onPause();
+        }
     }
 
     /**
-     * Resumes the GLSurfaceView.
+     * Resumes the GLSurfaceView or GLTextureView.
      */
     public void onResume() {
-        mGLSurfaceView.onResume();
+        if (mGLSurfaceView != null) {
+            mGLSurfaceView.onResume();
+        }
+        if (mGLTextureView != null) {
+            mGLTextureView.onResume();
+        }
     }
 
     public static class Size {
@@ -359,6 +415,26 @@ public class GPUImageView extends FrameLayout {
         }
 
         public GPUImageGLSurfaceView(Context context, AttributeSet attrs) {
+            super(context, attrs);
+        }
+
+        @Override
+        protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+            if (mForceSize != null) {
+                super.onMeasure(MeasureSpec.makeMeasureSpec(mForceSize.width, MeasureSpec.EXACTLY),
+                        MeasureSpec.makeMeasureSpec(mForceSize.height, MeasureSpec.EXACTLY));
+            } else {
+                super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+            }
+        }
+    }
+
+    private class GPUImageTextureView extends GLTextureView {
+        public GPUImageTextureView(Context context) {
+            super(context);
+        }
+
+        public GPUImageTextureView(Context context, AttributeSet attrs) {
             super(context, attrs);
         }
 

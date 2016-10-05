@@ -34,6 +34,7 @@ public class ActivityMain extends Activity implements OnClickListener {
         setContentView(R.layout.activity_main);
         findViewById(R.id.button_gallery).setOnClickListener(this);
         findViewById(R.id.button_camera).setOnClickListener(this);
+        findViewById(R.id.button_camera_texture).setOnClickListener(this);
     }
 
     @Override public void onClick(final View v) {
@@ -63,7 +64,9 @@ public class ActivityMain extends Activity implements OnClickListener {
             case R.id.button_camera:
                 startActivity(new Intent(this, ActivityCamera.class));
                 break;
-
+            case R.id.button_camera_texture:
+                startActivity(new Intent(this, ActivityCameraTexture.class));
+                break;
             default:
                 break;
         }

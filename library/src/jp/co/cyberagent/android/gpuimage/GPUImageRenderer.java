@@ -16,7 +16,6 @@
 
 package jp.co.cyberagent.android.gpuimage;
 
-import android.annotation.TargetApi;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.SurfaceTexture;
@@ -24,7 +23,7 @@ import android.hardware.Camera;
 import android.hardware.Camera.PreviewCallback;
 import android.hardware.Camera.Size;
 import android.opengl.GLES20;
-import android.opengl.GLSurfaceView.Renderer;
+import android.opengl.GLSurfaceView;
 
 import jp.co.cyberagent.android.gpuimage.util.TextureRotationUtil;
 
@@ -40,8 +39,7 @@ import java.util.Queue;
 
 import static jp.co.cyberagent.android.gpuimage.util.TextureRotationUtil.TEXTURE_NO_ROTATION;
 
-@TargetApi(11)
-public class GPUImageRenderer implements Renderer, PreviewCallback {
+public class GPUImageRenderer implements GLSurfaceView.Renderer, GLTextureView.Renderer, PreviewCallback {
     public static final int NO_IMAGE = -1;
     static final float CUBE[] = {
             -1.0f, -1.0f,

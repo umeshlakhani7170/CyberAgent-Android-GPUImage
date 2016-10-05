@@ -517,8 +517,6 @@ public class GLTextureView
          *           GL11 or higher interfaces.
          */
         void onDrawFrame(GL10 gl);
-
-        void onSurfaceDestroyed(GL10 gl);
     }
 
     /**
@@ -751,8 +749,8 @@ public class GLTextureView
      */
 
     private static class EglHelper {
-        public EglHelper(WeakReference<GLTextureView> glSurfaceViewWeakRef) {
-            mGLSurfaceViewWeakRef = glSurfaceViewWeakRef;
+        public EglHelper(WeakReference<GLTextureView> glTextureViewWeakRef) {
+            mGLTextureViewWeakRef = glTextureViewWeakRef;
         }
 
         /**
@@ -783,7 +781,7 @@ public class GLTextureView
             if (!mEgl.eglInitialize(mEglDisplay, version)) {
                 throw new RuntimeException("eglInitialize failed");
             }
-            GLTextureView view = mGLSurfaceViewWeakRef.get();
+            GLTextureView view = mGLTextureViewWeakRef.get();
             if (view == null) {
                 mEglConfig = null;
                 mEglContext = null;
@@ -839,7 +837,7 @@ public class GLTextureView
             /*
              * Create an EGL surface we can render into.
              */
-            GLTextureView view = mGLSurfaceViewWeakRef.get();
+            GLTextureView view = mGLTextureViewWeakRef.get();
             if (view != null) {
                 mEglSurface = view.mEGLWindowSurfaceFactory.createWindowSurface(mEgl,
                         mEglDisplay, mEglConfig, view.getSurfaceTexture());
@@ -877,7 +875,7 @@ public class GLTextureView
         GL createGL() {
 
             GL gl = mEglContext.getGL();
-            GLTextureView view = mGLSurfaceViewWeakRef.get();
+            GLTextureView view = mGLTextureViewWeakRef.get();
             if (view != null) {
                 if (view.mGLWrapper != null) {
                     gl = view.mGLWrapper.wrap(gl);
@@ -922,7 +920,7 @@ public class GLTextureView
                 mEgl.eglMakeCurrent(mEglDisplay, EGL10.EGL_NO_SURFACE,
                         EGL10.EGL_NO_SURFACE,
                         EGL10.EGL_NO_CONTEXT);
-                GLTextureView view = mGLSurfaceViewWeakRef.get();
+                GLTextureView view = mGLTextureViewWeakRef.get();
                 if (view != null) {
                     view.mEGLWindowSurfaceFactory.destroySurface(mEgl, mEglDisplay, mEglSurface);
                 }
@@ -935,7 +933,7 @@ public class GLTextureView
                 Log.w("EglHelper", "finish() tid=" + Thread.currentThread().getId());
             }
             if (mEglContext != null) {
-                GLTextureView view = mGLSurfaceViewWeakRef.get();
+                GLTextureView view = mGLTextureViewWeakRef.get();
                 if (view != null) {
                     view.mEGLContextFactory.destroyContext(mEgl, mEglDisplay, mEglContext);
                 }
@@ -968,7 +966,7 @@ public class GLTextureView
             return function + " failed: " + error;
         }
 
-        private WeakReference<GLTextureView> mGLSurfaceViewWeakRef;
+        private WeakReference<GLTextureView> mGLTextureViewWeakRef;
         EGL10 mEgl;
         EGLDisplay mEglDisplay;
         EGLSurface mEglSurface;
@@ -985,13 +983,13 @@ public class GLTextureView
      * avoids multiple-lock ordering issues.
      */
     static class GLThread extends Thread {
-        GLThread(WeakReference<GLTextureView> glSurfaceViewWeakRef) {
+        GLThread(WeakReference<GLTextureView> glTextureViewWeakRef) {
             super();
             mWidth = 0;
             mHeight = 0;
             mRequestRender = true;
             mRenderMode = RENDERMODE_CONTINUOUSLY;
-            mGLSurfaceViewWeakRef = glSurfaceViewWeakRef;
+            mGLTextureViewWeakRef = glTextureViewWeakRef;
         }
 
         @Override
@@ -1034,7 +1032,7 @@ public class GLTextureView
         }
 
         private void guardedRun() throws InterruptedException {
-            mEglHelper = new EglHelper(mGLSurfaceViewWeakRef);
+            mEglHelper = new EglHelper(mGLTextureViewWeakRef);
             mHaveEglContext = false;
             mHaveEglSurface = false;
             try {
@@ -1102,7 +1100,7 @@ public class GLTextureView
 
                             // When pausing, optionally release the EGL Context:
                             if (pausing && mHaveEglContext) {
-                                GLTextureView view = mGLSurfaceViewWeakRef.get();
+                                GLTextureView view = mGLTextureViewWeakRef.get();
                                 boolean preserveEglContextOnPause = view == null ?
                                         false : view.mPreserveEGLContextOnPause;
                                 if (!preserveEglContextOnPause || sGLThreadManager.shouldReleaseEGLContextWhenPausing()) {
@@ -1255,7 +1253,7 @@ public class GLTextureView
                         if (LOG_RENDERER) {
                             Log.w("GLThread", "onSurfaceCreated");
                         }
-                        GLTextureView view = mGLSurfaceViewWeakRef.get();
+                        GLTextureView view = mGLTextureViewWeakRef.get();
                         if (view != null) {
                             view.mRenderer.onSurfaceCreated(gl, mEglHelper.mEglConfig);
                         }
@@ -1266,7 +1264,7 @@ public class GLTextureView
                         if (LOG_RENDERER) {
                             Log.w("GLThread", "onSurfaceChanged(" + w + ", " + h + ")");
                         }
-                        GLTextureView view = mGLSurfaceViewWeakRef.get();
+                        GLTextureView view = mGLTextureViewWeakRef.get();
                         if (view != null) {
                             view.mRenderer.onSurfaceChanged(gl, w, h);
                         }
@@ -1277,7 +1275,7 @@ public class GLTextureView
                         Log.w("GLThread", "onDrawFrame tid=" + getId());
                     }
                     {
-                        GLTextureView view = mGLSurfaceViewWeakRef.get();
+                        GLTextureView view = mGLTextureViewWeakRef.get();
                         if (view != null) {
                             view.mRenderer.onDrawFrame(gl);
                         }
@@ -1520,7 +1518,7 @@ public class GLTextureView
          * This weak reference allows the GLTextureView to be garbage collected while the GLThread
          * is still alive.
          */
-        private WeakReference<GLTextureView> mGLSurfaceViewWeakRef;
+        private WeakReference<GLTextureView> mGLTextureViewWeakRef;
 
     }
 
