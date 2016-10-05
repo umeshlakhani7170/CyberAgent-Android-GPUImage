@@ -50,7 +50,7 @@ import java.util.List;
 public class GPUImage {
     private final Context mContext;
     private final GPUImageRenderer mRenderer;
-    private GLSurfaceView mGlSurfaceView;
+    private GLSurfaceView mGLSurfaceView;
     private GLTextureView mGLTextureView;
     private GPUImageFilter mFilter;
     private Bitmap mCurrentBitmap;
@@ -91,13 +91,13 @@ public class GPUImage {
      * @param view the GLSurfaceView
      */
     public void setGLSurfaceView(final GLSurfaceView view) {
-        mGlSurfaceView = view;
-        mGlSurfaceView.setEGLContextClientVersion(2);
-        mGlSurfaceView.setEGLConfigChooser(8, 8, 8, 8, 16, 0);
-        mGlSurfaceView.getHolder().setFormat(PixelFormat.RGBA_8888);
-        mGlSurfaceView.setRenderer(mRenderer);
-        mGlSurfaceView.setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
-        mGlSurfaceView.requestRender();
+        mGLSurfaceView = view;
+        mGLSurfaceView.setEGLContextClientVersion(2);
+        mGLSurfaceView.setEGLConfigChooser(8, 8, 8, 8, 16, 0);
+        mGLSurfaceView.getHolder().setFormat(PixelFormat.RGBA_8888);
+        mGLSurfaceView.setRenderer(mRenderer);
+        mGLSurfaceView.setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
+        mGLSurfaceView.requestRender();
     }
 
     /**
@@ -130,11 +130,59 @@ public class GPUImage {
      * Request the preview to be rendered again.
      */
     public void requestRender() {
-        if (mGlSurfaceView != null) {
-            mGlSurfaceView.requestRender();
+        if (mGLSurfaceView != null) {
+            mGLSurfaceView.requestRender();
         }
         if (mGLTextureView != null) {
             mGLTextureView.requestRender();
+        }
+    }
+
+    /**
+     * Pauses the GLSurfaceView or GLTextureView.
+     */
+    public void onPause() {
+        if (mGLSurfaceView != null) {
+            mGLSurfaceView.onPause();
+        }
+        if (mGLTextureView != null) {
+            mGLTextureView.onPause();
+        }
+    }
+
+    /**
+     * Resumes the GLSurfaceView or GLTextureView.
+     */
+    public void onResume() {
+        if (mGLSurfaceView != null) {
+            mGLSurfaceView.onResume();
+        }
+        if (mGLTextureView != null) {
+            mGLTextureView.onResume();
+        }
+    }
+
+    /**
+     * Set the rendering mode - RENDERMODE_CONTINUOUSLY.
+     */
+    public void setContinuouslyRenderMode() {
+        if (mGLSurfaceView != null) {
+            mGLSurfaceView.setRenderMode(GLSurfaceView.RENDERMODE_CONTINUOUSLY);
+        }
+        if (mGLTextureView != null) {
+            mGLTextureView.setRenderMode(GLTextureView.RENDERMODE_CONTINUOUSLY);
+        }
+    }
+
+    /**
+     * Set the rendering mode - RENDERMODE_WHEN_DIRTY.
+     */
+    public void setWhenDirtyRenderMode() {
+        if (mGLSurfaceView != null) {
+            mGLSurfaceView.setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
+        }
+        if (mGLTextureView != null) {
+            mGLTextureView.setRenderMode(GLTextureView.RENDERMODE_WHEN_DIRTY);
         }
     }
 
@@ -157,12 +205,7 @@ public class GPUImage {
      */
     public void setUpCamera(final Camera camera, final int degrees, final boolean flipHorizontal,
             final boolean flipVertical) {
-        if (mGlSurfaceView!= null) {
-            mGlSurfaceView.setRenderMode(GLSurfaceView.RENDERMODE_CONTINUOUSLY);
-        }
-        if (mGLTextureView != null) {
-            mGLTextureView.setRenderMode(GLTextureView.RENDERMODE_CONTINUOUSLY);
-        }
+        setContinuouslyRenderMode();
 
         if (Build.VERSION.SDK_INT > Build.VERSION_CODES.GINGERBREAD_MR1) {
             setUpCameraGingerbread(camera);
@@ -303,7 +346,7 @@ public class GPUImage {
      * @return the bitmap with filter applied
      */
     public Bitmap getBitmapWithFilterApplied(final Bitmap bitmap) {
-        if (mGlSurfaceView != null || mGLTextureView != null) {
+        if (mGLSurfaceView != null || mGLTextureView != null) {
             mRenderer.deleteImage();
             mRenderer.runOnDraw(new Runnable() {
 

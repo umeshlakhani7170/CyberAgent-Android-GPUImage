@@ -51,9 +51,11 @@ public class ActivityGallery extends Activity implements OnSeekBarChangeListener
 
         mGPUImageView = (GPUImageView) findViewById(R.id.gpuimage);
 
-        Intent photoPickerIntent = new Intent(Intent.ACTION_PICK);
-        photoPickerIntent.setType("image/*");
-        startActivityForResult(photoPickerIntent, REQUEST_PICK_IMAGE);
+        if (savedInstanceState == null) {
+            Intent photoPickerIntent = new Intent(Intent.ACTION_PICK);
+            photoPickerIntent.setType("image/*");
+            startActivityForResult(photoPickerIntent, REQUEST_PICK_IMAGE);
+        }
     }
 
     @Override
