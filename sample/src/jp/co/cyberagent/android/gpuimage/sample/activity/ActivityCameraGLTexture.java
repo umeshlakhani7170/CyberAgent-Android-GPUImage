@@ -23,7 +23,6 @@ import android.hardware.Camera;
 import android.hardware.Camera.CameraInfo;
 import android.hardware.Camera.Parameters;
 import android.net.Uri;
-import android.opengl.GLSurfaceView;
 import android.os.Bundle;
 import android.os.Environment;
 import android.util.Log;
@@ -32,13 +31,7 @@ import android.view.View.OnClickListener;
 import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-
+import jp.co.cyberagent.android.gpuimage.GLTextureView;
 import jp.co.cyberagent.android.gpuimage.GPUImage;
 import jp.co.cyberagent.android.gpuimage.GPUImage.OnPictureSavedListener;
 import jp.co.cyberagent.android.gpuimage.GPUImageFilter;
@@ -49,7 +42,14 @@ import jp.co.cyberagent.android.gpuimage.sample.R;
 import jp.co.cyberagent.android.gpuimage.sample.utils.CameraHelper;
 import jp.co.cyberagent.android.gpuimage.sample.utils.CameraHelper.CameraInfo2;
 
-public class ActivityCamera extends Activity implements OnSeekBarChangeListener, OnClickListener {
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
+public class ActivityCameraGLTexture extends Activity implements OnSeekBarChangeListener, OnClickListener {
 
     private GPUImage mGPUImage;
     private CameraHelper mCameraHelper;
@@ -60,13 +60,13 @@ public class ActivityCamera extends Activity implements OnSeekBarChangeListener,
     @Override
     public void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_camera);
+        setContentView(R.layout.activity_camera_gl_texture);
         ((SeekBar) findViewById(R.id.seekBar)).setOnSeekBarChangeListener(this);
         findViewById(R.id.button_choose_filter).setOnClickListener(this);
         findViewById(R.id.button_capture).setOnClickListener(this);
 
         mGPUImage = new GPUImage(this);
-        mGPUImage.setGLSurfaceView((GLSurfaceView) findViewById(R.id.surfaceView));
+        mGPUImage.setGLTextureView((GLTextureView) findViewById(R.id.textureView));
 
         mCameraHelper = new CameraHelper(this);
         mCamera = new CameraLoader();
@@ -126,7 +126,7 @@ public class ActivityCamera extends Activity implements OnSeekBarChangeListener,
 
     private void takePicture() {
         // TODO get a size that is about the size of the screen
-        Camera.Parameters params = mCamera.mCameraInstance.getParameters();
+        Parameters params = mCamera.mCameraInstance.getParameters();
         params.setRotation(90);
         mCamera.mCameraInstance.setParameters(params);
         for (Camera.Size size : params.getSupportedPictureSizes()) {
@@ -158,8 +158,8 @@ public class ActivityCamera extends Activity implements OnSeekBarChangeListener,
                         data = null;
                         Bitmap bitmap = BitmapFactory.decodeFile(pictureFile.getAbsolutePath());
                         // mGPUImage.setImage(bitmap);
-                        final GLSurfaceView view = (GLSurfaceView) findViewById(R.id.surfaceView);
-                        view.setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
+                        final GLTextureView view = (GLTextureView) findViewById(R.id.textureView);
+                        view.setRenderMode(GLTextureView.RENDERMODE_WHEN_DIRTY);
                         mGPUImage.saveToPictures(bitmap, "GPUImage",
                                 System.currentTimeMillis() + ".jpg",
                                 new OnPictureSavedListener() {
@@ -169,7 +169,7 @@ public class ActivityCamera extends Activity implements OnSeekBarChangeListener,
                                             uri) {
                                         pictureFile.delete();
                                         camera.startPreview();
-                                        view.setRenderMode(GLSurfaceView.RENDERMODE_CONTINUOUSLY);
+                                        view.setRenderMode(GLTextureView.RENDERMODE_CONTINUOUSLY);
                                     }
                                 });
                     }
@@ -262,13 +262,13 @@ public class ActivityCamera extends Activity implements OnSeekBarChangeListener,
             // TODO adjust by getting supportedPreviewSizes and then choosing
             // the best one for screen size (best fill screen)
             if (parameters.getSupportedFocusModes().contains(
-                    Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE)) {
+                    Parameters.FOCUS_MODE_CONTINUOUS_PICTURE)) {
                 parameters.setFocusMode(Parameters.FOCUS_MODE_CONTINUOUS_PICTURE);
             }
             mCameraInstance.setParameters(parameters);
 
             int orientation = mCameraHelper.getCameraDisplayOrientation(
-                    ActivityCamera.this, mCurrentCameraId);
+                    ActivityCameraGLTexture.this, mCurrentCameraId);
             CameraInfo2 cameraInfo = new CameraInfo2();
             mCameraHelper.getCameraInfo(mCurrentCameraId, cameraInfo);
             boolean flipHorizontal = cameraInfo.facing == CameraInfo.CAMERA_FACING_FRONT;

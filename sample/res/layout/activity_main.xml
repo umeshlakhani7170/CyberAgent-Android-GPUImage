@@ -19,18 +19,30 @@
             android:text="Gallery" />
 
         <Button
-            android:id="@+id/button_camera"
+            android:id="@+id/button_camera_gl_surface"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:drawableTop="@android:drawable/ic_menu_camera"
-            android:text="Camera" />
+            android:text="Camera\nGLSurface" />
 
+        <Button
+            android:id="@+id/button_camera_gl_texture"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:drawableTop="@android:drawable/ic_menu_camera"
+            android:text="Camera\nGLTexture" />
+        <Button
+            android:id="@+id/button_camera_surface"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:drawableTop="@android:drawable/ic_menu_camera"
+            android:text="Camera\nSurface" />
         <Button
             android:id="@+id/button_camera_texture"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:drawableTop="@android:drawable/ic_menu_camera"
-            android:text="Camera Texture" />
+            android:text="Camera\nTexture" />
     </LinearLayout>
 
 </FrameLayout>

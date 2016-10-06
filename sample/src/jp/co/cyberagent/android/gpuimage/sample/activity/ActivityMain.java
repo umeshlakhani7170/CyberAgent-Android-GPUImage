@@ -33,7 +33,9 @@ public class ActivityMain extends Activity implements OnClickListener {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         findViewById(R.id.button_gallery).setOnClickListener(this);
-        findViewById(R.id.button_camera).setOnClickListener(this);
+        findViewById(R.id.button_camera_gl_surface).setOnClickListener(this);
+        findViewById(R.id.button_camera_gl_texture).setOnClickListener(this);
+        findViewById(R.id.button_camera_surface).setOnClickListener(this);
         findViewById(R.id.button_camera_texture).setOnClickListener(this);
     }
 
@@ -61,8 +63,14 @@ public class ActivityMain extends Activity implements OnClickListener {
             case R.id.button_gallery:
                 startActivity(new Intent(this, ActivityGallery.class));
                 break;
-            case R.id.button_camera:
-                startActivity(new Intent(this, ActivityCamera.class));
+            case R.id.button_camera_gl_surface:
+                startActivity(new Intent(this, ActivityCameraGLSurface.class));
+                break;
+            case R.id.button_camera_gl_texture:
+                startActivity(new Intent(this, ActivityCameraGLTexture.class));
+                break;
+            case R.id.button_camera_surface:
+                startActivity(new Intent(this, ActivityCameraSurface.class));
                 break;
             case R.id.button_camera_texture:
                 startActivity(new Intent(this, ActivityCameraTexture.class));
