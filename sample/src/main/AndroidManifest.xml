@@ -1,6 +1,10 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="jp.co.cyberagent.android.gpuimage.sample">
 
+    <uses-feature
+        android:name="android.hardware.camera"
+        android:required="false" />
+
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.CAMERA" />
 
@@ -16,7 +20,8 @@
         android:theme="@style/AppTheme" >
         <activity
             android:name=".activity.ActivityMain"
-            android:label="@string/title_activity_activity_main" >
+            android:label="@string/title_activity_activity_main"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
